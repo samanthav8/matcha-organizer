@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import NavBar from "./NavBar";
 import Home from "./Home";
 import Login from "./Login";
+import Signup from "./Signup";
 
 function App() {
   //reading user state from redux
@@ -18,9 +19,11 @@ function App() {
         {user && <NavBar />}
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/home" />} />
           <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
           <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
         </Routes>
+
       </div>
     </Router>
   );
