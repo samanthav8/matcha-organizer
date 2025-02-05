@@ -1,13 +1,26 @@
 // src/components/App.js
 import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+//useSelector gets data from redux store
+import { useSelector } from "react-redux";
 import NavBar from "./NavBar";
+import Home from "./Home";
+import Login from "./Login";
 
 function App() {
+  //reading user state from redux
+  const user = useSelector((state) => state.user);
+
   return (
     <Router>
       <div>
-        <NavBar />
+        {/*navbar only shows if the user is true*/}
+        {user && <NavBar />}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
+          <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+        </Routes>
       </div>
     </Router>
   );
