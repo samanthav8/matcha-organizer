@@ -1,16 +1,27 @@
 // src/store.js
-import { createStore, combineReducers } from "redux";
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import { thunk } from "redux-thunk";
+
+
+// initial state for user
+const initialUserState = {
+  user: null,         
+  userDetails: null,
+};
 
 //function taking current state and action and returns the new state
-const userReducer = (state = null, action) => {
+const userReducer = (state = initialUserState, action) => {
   switch (action.type) {
-    //updates state w/ user data
+    //updates state w/ user name and pw
     case "SET_USER":
-      return action.payload;
+      return { ...state, user: action.payload };
+    // set full user details
+    case "SET_USER_DETAILS":
+      return { ...state, userDetails: action.payload };
     //logs out user
     case "LOGOUT_USER":
-      return null;
-    //returns state unchanged
+      return initialUserState;
+    //return
     default:
       return state;
   }
@@ -19,13 +30,14 @@ const userReducer = (state = null, action) => {
 //func taking object where keys represent slice of our global state
 //with values and reducer function
 const rootReducer = combineReducers({
-  user: userReducer,
+  userData: userReducer,
 });
 
 //holds state of the app. created by passing the root reducer which is
 //all of our reducers
 const store = createStore(
   rootReducer,
+  applyMiddleware(thunk)
 );
 
 export default store;
