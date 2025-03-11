@@ -18,7 +18,13 @@ if __name__ == '__main__':
         db.session.commit()
 
         print("Seeding users...")
-        users = [User(name=fake.first_name(), password=fake.password()) for _ in range(5)]
+        users = [
+            User(name="alice", password="alice"),
+            User(name="bob", password="bob"),
+            User(name="charlie", password="charlie"),
+            User(name="david", password="david"),
+            User(name="emma", password="emma"),
+        ]
         db.session.add_all(users)
         db.session.commit()  
 

@@ -21,11 +21,26 @@ class Login(Resource):
 
 
 class Users(Resource):
+    # this is where u adjust brands matchas and grades matchas to only include
+    # the user matchas
     def get(self):
-        # this is where u adjust brands matchas and grades matchas to only include
-        # the user matchas
         users = User.query.all()
-        return jsonify([user.to_dict() for user in users])
+        user_list = []
+        
+        for user in users:
+            # filter brands and grades to only include matchas that belong to this user
+            user_matchas = Matcha.query.filter_by(user_id=user.id).all()
+            brands = list({matcha.brand for matcha in user_matchas})
+            grades = list({matcha.grade for matcha in user_matchas})
+            
+            user_data = user.to_dict(rules=('-password',)) 
+            user_data["brands"] = [brand.to_dict() for brand in brands]
+            user_data["grades"] = [grade.to_dict() for grade in grades]
+            
+            user_list.append(user_data)
+        
+        return jsonify(user_list)
+
     
     def post(self):
         data = request.get_json()
