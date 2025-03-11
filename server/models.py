@@ -7,13 +7,15 @@ from config import db
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
-    serialize_rules = ('-matchas.user',)
+    serialize_rules = ('-matchas.user','-password',)
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    
-    matchas = db.relationship('Matcha', back_populates='user')
+
+    brands = db.relationship('Brand', secondary='matchas', viewonly=True)
+    grades = db.relationship('Grade', secondary='matchas', viewonly=True)
+    # matchas = db.relationship('Matcha', back_populates='user')
 
     def __repr__(self):
         return f'<User id={self.id}, name={self.name}>'
@@ -23,13 +25,13 @@ class User(db.Model, SerializerMixin):
 
 class Brand(db.Model, SerializerMixin):
     __tablename__ = 'brands'
-    serialize_rules = ('-matchas.brand',)
+    serialize_rules = ('-matchas.brand','-matchas.user_id',)
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     website = db.Column(db.String(100), nullable=False)
     
-    matchas = db.relationship('Matcha', back_populates='brand')
+    matchas = db.relationship('Matcha', backref='brand', lazy=True)
 
     def __repr__(self):
         return f'<Brand id={self.id}, name={self.name}>'
@@ -38,12 +40,12 @@ class Brand(db.Model, SerializerMixin):
 
 class Grade(db.Model, SerializerMixin):
     __tablename__ = 'grades'
-    serialize_rules = ('-matchas.grade',)
+    serialize_rules = ('-matchas.grade', '-matchas.user_id',)
     
     id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.String(50), nullable=False)
     
-    matchas = db.relationship('Matcha', back_populates='grade')
+    matchas = db.relationship('Matcha', backref='grade', lazy=True)
 
     def __repr__(self):
         return f'<Grade id={self.id}, grade={self.grade}>'
@@ -53,7 +55,7 @@ class Grade(db.Model, SerializerMixin):
 
 class Matcha(db.Model, SerializerMixin):
     __tablename__ = 'matchas'
-    serialize_rules = ('-user.matchas', '-brand.matchas', '-grade.matchas')
+    serialize_rules = ('-user.matchas', '-brand.matchas', '-grade.matchas', '-user_id',)  # Exclude user_id
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -64,9 +66,9 @@ class Matcha(db.Model, SerializerMixin):
     brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'), nullable=False)
     grade_id = db.Column(db.Integer, db.ForeignKey('grades.id'), nullable=False)
     
-    user = db.relationship('User', back_populates='matchas')
-    brand = db.relationship('Brand', back_populates='matchas')
-    grade = db.relationship('Grade', back_populates='matchas')
+    # user = db.relationship('User', back_populates='matchas')
+    # brand = db.relationship('Brand', back_populates='matchas')
+    # grade = db.relationship('Grade', back_populates='matchas')
 
     def __repr__(self):
         return f'<Matcha id={self.id}, name={self.name}, price={self.price}, origin={self.origin}, user_id={self.user_id}, brand_id={self.brand_id}, grade_id={self.grade_id}>'

@@ -8,6 +8,7 @@ import Home from "./Home";
 import Login from "./Login";
 import Signup from "./Signup";
 import MatchasByBrands from "./MatchasByBrands";
+import NewMatchaForm from "./NewMatchaForm";
 
 function App() {
   //reading user state from redux
@@ -51,6 +52,10 @@ function App() {
             }
           />
           <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
+          <Route
+            path="/matchas/new"
+            element={user ? <NewMatchaForm /> : <Navigate to="/login" />}
+          />
           <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
         </Routes>
 

@@ -22,6 +22,8 @@ class Login(Resource):
 
 class Users(Resource):
     def get(self):
+        # this is where u adjust brands matchas and grades matchas to only include
+        # the user matchas
         users = User.query.all()
         return jsonify([user.to_dict() for user in users])
     
