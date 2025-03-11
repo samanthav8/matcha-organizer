@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import request, jsonify
+from flask import request, jsonify, session
 from flask_restful import Resource
 from config import app, db, api
 from models import User, Matcha, Brand, Grade
@@ -14,10 +14,40 @@ class Login(Resource):
         data = request.get_json()
         if not data or 'name' not in data or 'password' not in data:
             return {"error": "Name and password required"}, 400
+
         user = User.query.filter_by(name=data['name']).first()
-        if user and user.password == data['password']:
-            return user.to_dict(), 200
-        return {"error": "Invalid credentials"}, 401
+        #when user doesnt exist
+        if user is None:
+            return {"error": "User not found"}, 404
+
+        #hashed pw verification
+        if user.check_password(data['password']):  
+            session['user_id'] = user.id  #storing user id 
+            return user.to_dict(rules=('-password_hash',)), 200
+
+        return {"error": "Invalid credentials"}, 401  
+    
+
+class CheckSession(Resource):
+    def get(self):
+        #retrieve user id from session
+        user_id = session.get('user_id')  
+
+        if not user_id:
+            return {"error": "Unauthorized"}, 401 
+
+        user = User.query.get(user_id)
+        if user:
+            return user.to_dict(rules=('-password_hash',)), 200  
+        
+        return {"error": "User not found"}, 404 
+
+    
+class Logout(Resource):
+    def delete(self):
+        #remove user from session
+        session.pop('user_id', None)
+        return {"message": "Logged out successfully"}, 204
 
 
 class Users(Resource):
@@ -128,6 +158,8 @@ class Grades(Resource):
         return new_grade.to_dict(), 201
 
 api.add_resource(Login, '/login')
+api.add_resource(CheckSession, '/check_session')
+api.add_resource(Logout, '/logout')
 api.add_resource(Users, '/users')
 api.add_resource(Matchas, '/matchas')
 api.add_resource(MatchaByID, '/matchas/<int:id>')

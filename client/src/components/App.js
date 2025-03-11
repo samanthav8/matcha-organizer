@@ -1,8 +1,6 @@
 // src/components/App.js
-import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-//useSelector gets data from redux store
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import NavBar from "./NavBar";
 import Home from "./Home";
 import Login from "./Login";
@@ -11,56 +9,32 @@ import MatchasByBrands from "./MatchasByBrands";
 import NewMatchaForm from "./NewMatchaForm";
 
 function App() {
-  //reading user state from redux
-  const { user, userDetails } = useSelector((state) => state.userData);
-  const dispatch = useDispatch();
+  const [user, setUser] = useState(null);
+  const location = useLocation(); // 
 
-  // thunk action fetching user details and dispatching
+  //checks session
   useEffect(() => {
-    if (user) {
-      dispatch((dispatch) => {
-        fetch("http://127.0.0.1:5555/users")
-          .then((res) => res.json())
-          .then((data) => {
-            // search for specific user
-            const currentUser = data.find((u) => u.id === user.id);
-            // dispatch set user details
-            dispatch({ type: "SET_USER_DETAILS", payload: currentUser });
-          })
-          .catch((error) => console.error("Error fetching user details:", error));
-      });
-    }
-  }, [user, dispatch]);
+    fetch("/check_session", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then(setUser)
+      .catch(() => setUser(null));
+  }, []);
 
+  // hide navbar on login/logou pages
+  const hideNavBar = !user || location.pathname === "/login" || location.pathname === "/signup";
 
   return (
-    <Router>
-      <div>
-        {/*navbar only shows if the user is true*/}
-        {user && <NavBar />}
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/home" />} />
-          <Route
-            path="/brands-view"
-            element={
-              user ? (
-                <MatchasByBrands userMatchas={userDetails?.matchas || []} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-          <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
-          <Route
-            path="/matchas/new"
-            element={user ? <NewMatchaForm /> : <Navigate to="/login" />}
-          />
-          <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-        </Routes>
-
-      </div>
-    </Router>
+    <div>
+      {!hideNavBar && <NavBar setUser={setUser} />}
+      <Routes>
+        <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/home" />} />
+        <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/home" />} />
+        <Route path="/brands-view" element={user ? <MatchasByBrands /> : <Navigate to="/login" />} />
+        <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
+        <Route path="/matchas/new" element={user ? <NewMatchaForm /> : <Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to={user ? "/home" : "/login"} />} />
+      </Routes>
+    </div>
   );
 }
 

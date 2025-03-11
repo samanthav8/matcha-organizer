@@ -18,15 +18,22 @@ if __name__ == '__main__':
         db.session.commit()
 
         print("Seeding users...")
-        users = [
-            User(name="alice", password="alice"),
-            User(name="bob", password="bob"),
-            User(name="charlie", password="charlie"),
-            User(name="david", password="david"),
-            User(name="emma", password="emma"),
+        users = []
+        user_data = [
+            {"name": "alice", "password": "alice"},
+            {"name": "bob", "password": "bob"},
+            {"name": "charlie", "password": "charlie"},
+            {"name": "david", "password": "david"},
+            {"name": "emma", "password": "emma"},
         ]
+        for data in user_data:
+            user = User(name=data["name"])
+            user.set_password(data["password"])  # Hash and set password
+            users.append(user)
+
         db.session.add_all(users)
-        db.session.commit()  
+        db.session.commit()
+
 
         print("Seeding brands...")
         brands = [
