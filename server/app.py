@@ -85,10 +85,9 @@ class Users(Resource):
         return new_user.to_dict(), 201
 
 class Matchas(Resource):
-    #rlly no need to get all matchas at any point
-    # def get(self):
-    #     matchas = Matcha.query.all()
-    #     return jsonify([matcha.to_dict() for matcha in matchas])
+    def get(self):
+        matchas = Matcha.query.all()
+        return jsonify([matcha.to_dict() for matcha in matchas])
     
     def post(self):
         data = request.get_json()
