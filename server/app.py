@@ -34,6 +34,7 @@ class Login(Resource):
 #checking if user is logged in
 class CheckSession(Resource):
     def get(self):
+        #get user id from session
         user_id = session.get('user_id') 
 
         if not user_id:
@@ -45,55 +46,33 @@ class CheckSession(Resource):
         
         return {"error": "User not found"}, 404
 
-
 class Logout(Resource):
     def delete(self):
         #remove user from session
         session.pop('user_id', None) 
         return {"message": "Logged out successfully"}, 204
-
-#get logged in users brands with respective matchas
-class UserBrands(Resource):
-    def get(self):
-        user_id = session.get('user_id')
-
-        if not user_id:
-            return {"error": "Unauthorized"}, 401 
-
-        brands = Brand.query.filter_by(user_id=user_id).all()
-        brands_data = []
-
-        for brand in brands:
-            matchas = Matcha.query.filter_by(brand_id=brand.id, user_id=user_id).all()
-            brands_data.append({
-                "brand": brand.to_dict(),
-                "matchas": [matcha.to_dict() for matcha in matchas]
-            })
-
-        return jsonify(brands_data)
-
-#get logged in users grades with respective matchas
-class UserGrades(Resource):
-    def get(self):
-        user_id = session.get('user_id')
-
-        if not user_id:
-            return {"error": "Unauthorized"}, 401 
-
-        grades = Grade.query.filter_by(user_id=user_id).all()
-        grades_data = []
-
-        for grade in grades:
-            matchas = Matcha.query.filter_by(grade_id=grade.id, user_id=user_id).all()
-            grades_data.append({
-                "grade": grade.to_dict(),
-                "matchas": [matcha.to_dict() for matcha in matchas]
-            })
-
-        return jsonify(grades_data)
     
-#creates users
+#gets and creates users
 class Users(Resource):
+    def get(self):
+        users = User.query.all()
+        user_list = []
+        
+        for user in users:
+            # filter brands and grades to only include matchas that belong to this user
+            user_matchas = Matcha.query.filter_by(user_id=user.id).all()
+            brands = list({matcha.brand for matcha in user_matchas})
+            grades = list({matcha.grade for matcha in user_matchas})
+            
+            user_data = user.to_dict(rules=('-password',)) 
+            user_data["brands"] = [brand.to_dict() for brand in brands]
+            user_data["grades"] = [grade.to_dict() for grade in grades]
+            
+            user_list.append(user_data)
+        
+        return jsonify(user_list)
+
+    
     def post(self):
         data = request.get_json()
         if not data or 'name' not in data or 'password' not in data:
@@ -106,6 +85,11 @@ class Users(Resource):
         return new_user.to_dict(), 201
 
 class Matchas(Resource):
+    #rlly no need to get all matchas at any point
+    # def get(self):
+    #     matchas = Matcha.query.all()
+    #     return jsonify([matcha.to_dict() for matcha in matchas])
+    
     def post(self):
         data = request.get_json()
         required_fields = ["name", "price", "origin", "user_id", "brand_id", "grade_id"]
@@ -189,8 +173,6 @@ api.add_resource(Login, '/login')
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Logout, '/logout')
 api.add_resource(Users, '/users')
-api.add_resource(UserBrands, '/user/brands')
-api.add_resource(UserGrades, '/user/grades')
 api.add_resource(Matchas, '/matchas')
 api.add_resource(MatchaByID, '/matchas/<int:id>')
 api.add_resource(Brands, '/brands')
