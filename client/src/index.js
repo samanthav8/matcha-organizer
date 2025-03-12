@@ -1,3 +1,4 @@
+// src/index.js
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
@@ -10,8 +11,6 @@ const container = document.getElementById("root");
 const root = createRoot(container);
 
 root.render(
-  //provider makes redux available to all components in app
-  //wrap app in router to use location
   <Provider store={store}>
     <Router>
       <App />

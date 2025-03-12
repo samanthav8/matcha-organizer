@@ -3,12 +3,14 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function NavBar({ setUser }) {
+  //navigate function to redirect
   const navigate = useNavigate();
 
   const handleLogout = () => {
     fetch("/logout", { method: "DELETE", credentials: "include" })
       .then(() => {
         setUser(null);
+        //clear last page
         localStorage.removeItem("lastPage"); 
         navigate("/login");
       });
@@ -27,4 +29,3 @@ function NavBar({ setUser }) {
 }
 
 export default NavBar;
-

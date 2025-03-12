@@ -3,36 +3,37 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login({ setUser }) {
+  //navigation function to redirect
   const navigate = useNavigate();
-
-  //local state for form inputs
   const [formData, setFormData] = useState({ name: "", password: "" });
   const [error, setError] = useState("");
 
+  //handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //handles login form submission
+  //handle login form submit
   const handleLogin = (e) => {
     e.preventDefault();
     setError("");
-  
+
+    //login request sent to backend
     fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
+      //include authetication cookies
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);
-        setUser(data); 
+        setUser(data);
         navigate("/home");
       })
       .catch((err) => setError(err.message));
   };
-  
 
   return (
     <div>
@@ -53,6 +54,5 @@ function Login({ setUser }) {
     </div>
   );
 }
-
 
 export default Login;

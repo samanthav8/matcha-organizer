@@ -9,50 +9,51 @@ from models import User, Matcha, Brand, Grade
 def index():
     return '<h1>Matcha Organizer API</h1>'
 
+#handling user authentication
 class Login(Resource):
     def post(self):
         data = request.get_json()
         if not data or 'name' not in data or 'password' not in data:
             return {"error": "Name and password required"}, 400
-
+        
+        #check if user exists
         user = User.query.filter_by(name=data['name']).first()
-        #when user doesnt exist
+
         if user is None:
             return {"error": "User not found"}, 404
 
-        #hashed pw verification
-        if user.check_password(data['password']):  
-            session['user_id'] = user.id  #storing user id 
+        #use hashed pw verification
+        if user.check_password(data['password']): 
+            #store user in in session
+            session['user_id'] = user.id 
             return user.to_dict(rules=('-password_hash',)), 200
 
-        return {"error": "Invalid credentials"}, 401  
-    
+        return {"error": "Invalid credentials"}, 401 
 
+
+#checking if user is logged in
 class CheckSession(Resource):
     def get(self):
-        #retrieve user id from session
-        user_id = session.get('user_id')  
+        #get user id from session
+        user_id = session.get('user_id') 
 
         if not user_id:
             return {"error": "Unauthorized"}, 401 
 
         user = User.query.get(user_id)
         if user:
-            return user.to_dict(rules=('-password_hash',)), 200  
+            return user.to_dict(rules=('-password_hash',)), 200
         
-        return {"error": "User not found"}, 404 
+        return {"error": "User not found"}, 404
 
-    
 class Logout(Resource):
     def delete(self):
         #remove user from session
-        session.pop('user_id', None)
+        session.pop('user_id', None) 
         return {"message": "Logged out successfully"}, 204
-
-
+    
+#gets and creates users
 class Users(Resource):
-    # this is where u adjust brands matchas and grades matchas to only include
-    # the user matchas
     def get(self):
         users = User.query.all()
         user_list = []
@@ -76,22 +77,25 @@ class Users(Resource):
         data = request.get_json()
         if not data or 'name' not in data or 'password' not in data:
             return {"error": "Name and password are required"}, 400
+        
+        #create new user
         new_user = User(name=data["name"], password=data["password"])
         db.session.add(new_user)
         db.session.commit()
         return new_user.to_dict(), 201
 
-
 class Matchas(Resource):
-    def get(self):
-        matchas = Matcha.query.all()
-        return jsonify([matcha.to_dict() for matcha in matchas])
+    #rlly no need to get all matchas at any point
+    # def get(self):
+    #     matchas = Matcha.query.all()
+    #     return jsonify([matcha.to_dict() for matcha in matchas])
     
     def post(self):
         data = request.get_json()
         required_fields = ["name", "price", "origin", "user_id", "brand_id", "grade_id"]
         if not data or any(field not in data for field in required_fields):
             return {"error": f"Missing required fields. Required fields: {required_fields}"}, 400
+        #create new matcha
         new_matcha = Matcha(
             name=data["name"],
             price=data["price"],
@@ -106,31 +110,37 @@ class Matchas(Resource):
 
 class MatchaByID(Resource):
     def get(self, id):
+        #get specific matcha
         matcha = Matcha.query.get(id)
         if matcha:
             return matcha.to_dict(), 200
         return {"error": "Matcha not found"}, 404
     
     def patch(self, id):
+        #get specific matcha
         matcha = Matcha.query.get(id)
         if not matcha:
             return {"error": "Matcha not found"}, 404
         data = request.get_json()
+        #update matcha data
         for key, value in data.items():
             setattr(matcha, key, value)
         db.session.commit()
         return matcha.to_dict(), 200
     
     def delete(self, id):
+        #get specific matcha
         matcha = Matcha.query.get(id)
         if not matcha:
             return {"error": "Matcha not found"}, 404
+        #delete matcha
         db.session.delete(matcha)
         db.session.commit()
         return {}, 204
 
 class Brands(Resource):
     def get(self):
+        #get all brands
         brands = Brand.query.all()
         return jsonify([brand.to_dict() for brand in brands])
     
@@ -138,6 +148,7 @@ class Brands(Resource):
         data = request.get_json()
         if not data or 'name' not in data or 'website' not in data:
             return {"error": "Name and website are required"}, 400
+        #create new brand
         new_brand = Brand(name=data["name"], website=data["website"])
         db.session.add(new_brand)
         db.session.commit()
@@ -152,6 +163,7 @@ class Grades(Resource):
         data = request.get_json()
         if not data or 'grade' not in data:
             return {"error": "Grade is required"}, 400
+        #create new grade
         new_grade = Grade(grade=data["grade"])
         db.session.add(new_grade)
         db.session.commit()

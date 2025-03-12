@@ -9,25 +9,26 @@ from config import db
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
-    serialize_rules = ('-matchas.user','-password',)
+    serialize_rules = ('-matchas.user', '-password_hash',) 
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False) 
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    password_hash = db.Column(db.String(255), nullable=False)
 
     brands = db.relationship('Brand', secondary='matchas', viewonly=True)
     grades = db.relationship('Grade', secondary='matchas', viewonly=True)
-    # matchas = db.relationship('Matcha', back_populates='user')
 
-    # set password + hash before stoing
     def set_password(self, password):
+        """Hash and set the password"""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        """Check if the password matches the stored hash"""
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f'<User id={self.id}, name={self.name}>'
+
     
 
 
@@ -81,4 +82,3 @@ class Matcha(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f'<Matcha id={self.id}, name={self.name}, price={self.price}, origin={self.origin}, user_id={self.user_id}, brand_id={self.brand_id}, grade_id={self.grade_id}>'
-    

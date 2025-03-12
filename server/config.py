@@ -1,7 +1,7 @@
 # Standard library imports
 
 # Remote library imports
-from flask import Flask
+from flask import Flask, session
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
@@ -18,7 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
 # Secure session settings
-app.config['SECRET_KEY'] = os.urandom(24)  # Secret key for sessions
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
@@ -34,5 +34,5 @@ db.init_app(app)
 # Instantiate REST API
 api = Api(app)
 
-# Instantiate CORS
+# Instantiate CORS and supports requests with cookies
 CORS(app, supports_credentials=True)

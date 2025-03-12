@@ -28,11 +28,12 @@ if __name__ == '__main__':
         ]
         for data in user_data:
             user = User(name=data["name"])
-            user.set_password(data["password"])  # Hash and set password
+            user.set_password(data["password"])
             users.append(user)
 
         db.session.add_all(users)
         db.session.commit()
+
 
 
         print("Seeding brands...")

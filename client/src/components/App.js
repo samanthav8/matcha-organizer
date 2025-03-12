@@ -10,9 +10,9 @@ import NewMatchaForm from "./NewMatchaForm";
 
 function App() {
   const [user, setUser] = useState(null);
-  const location = useLocation(); // 
+  const location = useLocation(); 
 
-  //checks session
+  // check session on load
   useEffect(() => {
     fetch("/check_session", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
@@ -20,12 +20,12 @@ function App() {
       .catch(() => setUser(null));
   }, []);
 
-  // hide navbar on login/logou pages
+  // if user is on login or sign up hide navbar
   const hideNavBar = !user || location.pathname === "/login" || location.pathname === "/signup";
 
   return (
     <div>
-      {!hideNavBar && <NavBar setUser={setUser} />}
+      {!hideNavBar && <NavBar setUser={setUser} />} {/* navbar only when a user is logged in*/}
       <Routes>
         <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/home" />} />
         <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/home" />} />
