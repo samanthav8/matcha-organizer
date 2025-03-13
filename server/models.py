@@ -19,11 +19,11 @@ class User(db.Model, SerializerMixin):
     grades = db.relationship('Grade', secondary='matchas', viewonly=True)
 
     def set_password(self, password):
-        """Hash and set the password"""
+        """hash and set the password"""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        """Check if the password matches the stored hash"""
+        """check if the password matches the stored hash"""
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):

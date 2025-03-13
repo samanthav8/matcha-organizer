@@ -1,10 +1,8 @@
 // src/components/Signup.js
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 function Signup() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   //local state for form inputs
@@ -21,28 +19,6 @@ function Signup() {
     e.preventDefault();
     setError("");
 
-    //POST request to users to create new user
-    fetch("http://localhost:5555/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Signup failed");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        //dispatch action to automatically sign user in
-        dispatch({ type: "SET_USER", payload: data });
-        //navigate to home after signing up
-        navigate("/home");
-      })
-      .catch((err) => {
-        console.error("Error during signup:", err);
-        setError("Signup failed. Please try again.");
-      });
   };
 
   return (

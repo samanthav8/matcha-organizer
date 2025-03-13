@@ -49,29 +49,15 @@ class CheckSession(Resource):
 class Logout(Resource):
     def delete(self):
         #remove user from session
-        session.pop('user_id', None) 
+        session['page_views'] = None
+        session['user_id'] = None
         return {"message": "Logged out successfully"}, 204
     
 #gets and creates users
 class Users(Resource):
     def get(self):
         users = User.query.all()
-        user_list = []
-        
-        for user in users:
-            # filter brands and grades to only include matchas that belong to this user
-            user_matchas = Matcha.query.filter_by(user_id=user.id).all()
-            brands = list({matcha.brand for matcha in user_matchas})
-            grades = list({matcha.grade for matcha in user_matchas})
-            
-            user_data = user.to_dict(rules=('-password',)) 
-            user_data["brands"] = [brand.to_dict() for brand in brands]
-            user_data["grades"] = [grade.to_dict() for grade in grades]
-            
-            user_list.append(user_data)
-        
-        return jsonify(user_list)
-
+        return jsonify([user.to_dict() for user in users])
     
     def post(self):
         data = request.get_json()
