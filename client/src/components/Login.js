@@ -1,29 +1,26 @@
-// src/components/Login.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login({ setUser }) {
-  //navigation function to redirect
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: "", password: "" });
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  //handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //handle login form submit
+  // Handle login form submit
   const handleLogin = (e) => {
     e.preventDefault();
     setError("");
 
-    //login request sent to backend
+    // Login request sent to backend
     fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
-      //include authetication cookies
+      // Include authentication cookies
       credentials: "include",
     })
       .then((res) => res.json())
@@ -40,12 +37,24 @@ function Login({ setUser }) {
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <div>
-          <label>Name:</label>
-          <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+          <label>Username:</label> {/* Updated from "Name" to "Username" */}
+          <input 
+            type="text" 
+            name="username"  /* Updated from "name" */
+            value={formData.username} 
+            onChange={handleChange} 
+            required 
+          />
         </div>
         <div>
           <label>Password:</label>
-          <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+          <input 
+            type="password" 
+            name="password" 
+            value={formData.password} 
+            onChange={handleChange} 
+            required 
+          />
         </div>
         <button type="submit">Login</button>
       </form>

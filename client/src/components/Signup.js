@@ -5,20 +5,36 @@ import { useNavigate } from "react-router-dom";
 function Signup() {
   const navigate = useNavigate();
 
-  //local state for form inputs
+  // Local state for form inputs
   const [formData, setFormData] = useState({ name: "", password: "" });
   const [error, setError] = useState("");
 
-  //updates form data when user types
+  // Updates form data when user types
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //handles signup
+  // Handles signup
   const handleSignup = (e) => {
     e.preventDefault();
     setError("");
 
+    // Send signup request to backend
+    fetch("/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) return res.json().then((data) => Promise.reject(data.error));
+        return res.json();
+      })
+      .then(() => {
+        // Redirect to login after successful signup
+        navigate("/login");
+      })
+      .catch((err) => setError(typeof err === "string" ? err : "An unexpected error occurred"));
   };
 
   return (

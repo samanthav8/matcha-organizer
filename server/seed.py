@@ -20,21 +20,19 @@ if __name__ == '__main__':
         print("Seeding users...")
         users = []
         user_data = [
-            {"name": "alice", "password": "alice"},
-            {"name": "bob", "password": "bob"},
-            {"name": "charlie", "password": "charlie"},
-            {"name": "david", "password": "david"},
-            {"name": "emma", "password": "emma"},
+            {"username": "alice", "password": "alice"},
+            {"username": "bob", "password": "bob"},
+            {"username": "charlie", "password": "charlie"},
+            {"username": "david", "password": "david"},
+            {"username": "emma", "password": "emma"},
         ]
         for data in user_data:
-            user = User(name=data["name"])
-            user.set_password(data["password"])
+            user = User(username=data["username"])
+            user.password_hash = data["password"]  # Uses setter to hash password
             users.append(user)
 
         db.session.add_all(users)
         db.session.commit()
-
-
 
         print("Seeding brands...")
         brands = [

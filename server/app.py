@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import request, jsonify, session
+from flask import request, jsonify, session, make_response
 from flask_restful import Resource
 from config import app, db, api
 from models import User, Matcha, Brand, Grade
@@ -9,41 +9,36 @@ from models import User, Matcha, Brand, Grade
 def index():
     return '<h1>Matcha Organizer API</h1>'
 
-#handling user authentication
 class Login(Resource):
     def post(self):
         data = request.get_json()
-        if not data or 'name' not in data or 'password' not in data:
-            return {"error": "Name and password required"}, 400
+        if not data or 'username' not in data or 'password' not in data:
+            return make_response(jsonify({"error": "Username and password required"}), 400)
         
-        #check if user exists
-        user = User.query.filter_by(name=data['name']).first()
-
+        user = User.query.filter_by(username=data['username']).first()
         if user is None:
-            return {"error": "User not found"}, 404
+            return make_response(jsonify({"error": "User not found"}), 404)
 
-        #use hashed pw verification
-        if user.check_password(data['password']): 
-            #store user in in session
+        if user.authenticate(data['password']): 
             session['user_id'] = user.id 
-            return user.to_dict(rules=('-password_hash',)), 200
+            return make_response(jsonify({"id": user.id, "username": user.username}), 200)
 
-        return {"error": "Invalid credentials"}, 401 
+        return make_response(jsonify({"error": "Invalid credentials"}), 401)
 
 
-#checking if user is logged in
+
 class CheckSession(Resource):
     def get(self):
         user_id = session.get('user_id')
 
         if not user_id:
-            return {"error": "Unauthorized"}, 401
+            return make_response(jsonify({"error": "Unauthorized"}), 401)
 
         user = User.query.get(user_id)
         if not user:
-            return {"error": "User not found"}, 404
+            return make_response(jsonify({"error": "User not found"}), 404)
 
-        # get only user matchas
+        # Get only user matchas
         user_matchas = Matcha.query.filter_by(user_id=user_id).all()
 
         user_brands = {}
@@ -77,23 +72,21 @@ class CheckSession(Resource):
                 }
             user_grades[matcha.grade_id]["matchas"].append(matcha_data)
 
-        return {
+        return make_response(jsonify({
             "id": user.id,
-            "name": user.name,
+            "username": user.username,
             "brands": list(user_brands.values()),
             "grades": list(user_grades.values())
-        }, 200
-
-
+        }), 200)
 
 class Logout(Resource):
     def delete(self):
-        #remove user from session
-        session['page_views'] = None
-        session['user_id'] = None
+        # Remove user from session
+        session.pop('user_id', None)
         return {"message": "Logged out successfully"}, 204
     
-#gets and creates users
+
+# Gets and creates users
 class Users(Resource):
     def get(self):
         users = User.query.all()
@@ -101,14 +94,21 @@ class Users(Resource):
     
     def post(self):
         data = request.get_json()
-        if not data or 'name' not in data or 'password' not in data:
-            return {"error": "Name and password are required"}, 400
+        if not data or 'username' not in data or 'password' not in data:
+            return {"error": "Username and password are required"}, 400
         
-        #create new user
-        new_user = User(name=data["name"], password=data["password"])
+        # Check if username already exists
+        existing_user = User.query.filter_by(username=data["username"]).first()
+        if existing_user:
+            return {"error": "Username already exists"}, 400
+        
+        # Create new user
+        new_user = User(username=data["username"])
+        new_user.password_hash = data["password"]  # This uses the setter to hash the password
         db.session.add(new_user)
         db.session.commit()
         return new_user.to_dict(), 201
+
 
 class Matchas(Resource):
     def get(self):
@@ -120,7 +120,8 @@ class Matchas(Resource):
         required_fields = ["name", "price", "origin", "user_id", "brand_id", "grade_id"]
         if not data or any(field not in data for field in required_fields):
             return {"error": f"Missing required fields. Required fields: {required_fields}"}, 400
-        #create new matcha
+        
+        # Create new matcha
         new_matcha = Matcha(
             name=data["name"],
             price=data["price"],
@@ -133,39 +134,43 @@ class Matchas(Resource):
         db.session.commit()
         return new_matcha.to_dict(), 201
 
+
 class MatchaByID(Resource):
     def get(self, id):
-        #get specific matcha
+        # Get specific matcha
         matcha = Matcha.query.get(id)
         if matcha:
             return matcha.to_dict(), 200
         return {"error": "Matcha not found"}, 404
     
     def patch(self, id):
-        #get specific matcha
+        # Get specific matcha
         matcha = Matcha.query.get(id)
         if not matcha:
             return {"error": "Matcha not found"}, 404
+        
         data = request.get_json()
-        #update matcha data
+        # Update matcha data
         for key, value in data.items():
             setattr(matcha, key, value)
         db.session.commit()
         return matcha.to_dict(), 200
     
     def delete(self, id):
-        #get specific matcha
+        # Get specific matcha
         matcha = Matcha.query.get(id)
         if not matcha:
             return {"error": "Matcha not found"}, 404
-        #delete matcha
+        
+        # Delete matcha
         db.session.delete(matcha)
         db.session.commit()
         return {}, 204
 
+
 class Brands(Resource):
     def get(self):
-        #get all brands
+        # Get all brands
         brands = Brand.query.all()
         return jsonify([brand.to_dict() for brand in brands])
     
@@ -173,11 +178,13 @@ class Brands(Resource):
         data = request.get_json()
         if not data or 'name' not in data or 'website' not in data:
             return {"error": "Name and website are required"}, 400
-        #create new brand
+        
+        # Create new brand
         new_brand = Brand(name=data["name"], website=data["website"])
         db.session.add(new_brand)
         db.session.commit()
         return new_brand.to_dict(), 201
+
 
 class Grades(Resource):
     def get(self):
@@ -188,12 +195,15 @@ class Grades(Resource):
         data = request.get_json()
         if not data or 'grade' not in data:
             return {"error": "Grade is required"}, 400
-        #create new grade
+        
+        # Create new grade
         new_grade = Grade(grade=data["grade"])
         db.session.add(new_grade)
         db.session.commit()
         return new_grade.to_dict(), 201
 
+
+# Register API resources
 api.add_resource(Login, '/login')
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Logout, '/logout')

@@ -1,34 +1,37 @@
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.hybrid import hybrid_property
+from flask_bcrypt import Bcrypt
 
+db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 from config import db
 
 # Models go here!
 
-class User(db.Model, SerializerMixin):
+class User(db.Model):
     __tablename__ = 'users'
-    serialize_rules = ('-matchas.user', '-password_hash',) 
-    
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    username = db.Column(db.String, unique=True, nullable=False)
+    _password_hash = db.Column(db.String, nullable=False)
 
-    brands = db.relationship('Brand', secondary='matchas', viewonly=True)
-    grades = db.relationship('Grade', secondary='matchas', viewonly=True)
+    @hybrid_property
+    def password_hash(self):
+        return self._password_hash
 
-    def set_password(self, password):
-        """hash and set the password"""
-        self.password_hash = generate_password_hash(password)
+    @password_hash.setter
+    def password_hash(self, password):
+        self._password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
-    def check_password(self, password):
-        """check if the password matches the stored hash"""
-        return check_password_hash(self.password_hash, password)
+    def authenticate(self, password):
+        return bcrypt.check_password_hash(self._password_hash, password)
 
     def __repr__(self):
-        return f'<User id={self.id}, name={self.name}>'
-
+        return f'<User id={self.id}, username={self.username}>'
 
 class Brand(db.Model, SerializerMixin):
     __tablename__ = 'brands'
