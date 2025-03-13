@@ -35,7 +35,7 @@ class User(db.Model, SerializerMixin):
 
 class Brand(db.Model, SerializerMixin):
     __tablename__ = 'brands'
-    serialize_rules = ('-matchas.brand','-matchas.user_id',)
+    serialize_rules = ('-matchas.brand',)
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -50,7 +50,7 @@ class Brand(db.Model, SerializerMixin):
 
 class Grade(db.Model, SerializerMixin):
     __tablename__ = 'grades'
-    serialize_rules = ('-matchas.grade', '-matchas.user_id',)
+    serialize_rules = ('-matchas.grade',)
     
     id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.String(50), nullable=False)
@@ -65,7 +65,7 @@ class Grade(db.Model, SerializerMixin):
 
 class Matcha(db.Model, SerializerMixin):
     __tablename__ = 'matchas'
-    serialize_rules = ('-user.matchas', '-brand.matchas', '-grade.matchas', '-user_id',)  # Exclude user_id
+    serialize_rules = ('-user.matchas', '-brand.matchas', '-grade.matchas',)
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
