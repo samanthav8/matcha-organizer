@@ -34,17 +34,57 @@ class Login(Resource):
 #checking if user is logged in
 class CheckSession(Resource):
     def get(self):
-        #get user id from session
-        user_id = session.get('user_id') 
+        user_id = session.get('user_id')
 
         if not user_id:
-            return {"error": "Unauthorized"}, 401 
+            return {"error": "Unauthorized"}, 401
 
         user = User.query.get(user_id)
-        if user:
-            return user.to_dict(rules=('-password_hash',)), 200
-        
-        return {"error": "User not found"}, 404
+        if not user:
+            return {"error": "User not found"}, 404
+
+        # get only user matchas
+        user_matchas = Matcha.query.filter_by(user_id=user_id).all()
+
+        user_brands = {}
+        user_grades = {}
+
+        for matcha in user_matchas:
+            matcha_data = {
+                "origin": matcha.origin,
+                "user_id": matcha.user_id,
+                "id": matcha.id,
+                "name": matcha.name,
+                "price": matcha.price,
+                "brand_id": matcha.brand_id,
+                "grade_id": matcha.grade_id,
+            }
+
+            if matcha.brand_id not in user_brands:
+                user_brands[matcha.brand_id] = {
+                    "id": matcha.brand.id,
+                    "name": matcha.brand.name,
+                    "website": matcha.brand.website,
+                    "matchas": []
+                }
+            user_brands[matcha.brand_id]["matchas"].append(matcha_data)
+
+            if matcha.grade_id not in user_grades:
+                user_grades[matcha.grade_id] = {
+                    "id": matcha.grade.id,
+                    "grade": matcha.grade.grade,
+                    "matchas": []
+                }
+            user_grades[matcha.grade_id]["matchas"].append(matcha_data)
+
+        return {
+            "id": user.id,
+            "name": user.name,
+            "brands": list(user_brands.values()),
+            "grades": list(user_grades.values())
+        }, 200
+
+
 
 class Logout(Resource):
     def delete(self):
