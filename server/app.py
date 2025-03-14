@@ -192,18 +192,19 @@ class Brands(Resource):
 class Grades(Resource):
     def get(self):
         grades = Grade.query.all()
-        return jsonify([grade.to_dict() for grade in grades])
+        return jsonify([grade.to_dict() for grade in grades] if grades else [])  # ✅ Ensure it returns an array
     
     def post(self):
         data = request.get_json()
         if not data or 'grade' not in data:
             return {"error": "Grade is required"}, 400
         
-        # create new grade
+        # Create new grade
         new_grade = Grade(grade=data["grade"])
         db.session.add(new_grade)
         db.session.commit()
         return new_grade.to_dict(), 201
+
 
 
 # Register API resources

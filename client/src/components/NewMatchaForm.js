@@ -1,41 +1,23 @@
 // src/components/NewMatchaForm.js
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import NavBar from "./NavBar";
+import { UserContext } from "../context/UserContext";
 
 function NewMatchaForm() {
-  const navigate = useNavigate();
-
-  const user = useSelector((state) => state.userData.user);
-
+  const { user, brands, setBrands, grades, setGrades } = useContext(UserContext);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
     origin: "",
     brand_id: "",
     grade_id: "",
+    newBrand: "",
+    newBrandWebsite: "",
+    newGrade: "",
   });
 
-  const [brands, setBrands] = useState([]);
-  const [grades, setGrades] = useState([]);
-
-
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:5555/brands")
-      .then((res) => res.json())
-      .then((data) => {
-        setBrands(data);
-      })
-      .catch((err) => console.error("Error fetching brands:", err));
-
-    fetch("http://127.0.0.1:5555/grades")
-      .then((res) => res.json())
-      .then((data) => {
-        setGrades(data);
-      })
-      .catch((err) => console.error("Error fetching grades:", err));
-  }, []);
+  const [showNewBrandInput, setShowNewBrandInput] = useState(false);
+  const [showNewGradeInput, setShowNewGradeInput] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,96 +25,141 @@ function NewMatchaForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const dataToSend = { ...formData, user_id: user.id };
-
-    fetch("http://127.0.0.1:5555/matchas", {
+  
+    if (!user) return alert("You must be logged in to add matcha.");
+  
+    const matchaData = {
+      name: formData.name,
+      price: parseFloat(formData.price),
+      origin: formData.origin,
+      user_id: user.id,
+      brand_id: formData.brand_id,
+      grade_id: formData.grade_id,
+    };
+  
+    fetch("/matchas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dataToSend),
+      body: JSON.stringify(matchaData),
+      credentials: "include",
     })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Error creating matcha");
-        }
-        return res.json();
+      .then((res) => res.json())
+      .then((newMatcha) => {
+        alert("Matcha added successfully!");
+  
+        const updatedGrades = grades.map((grade) => {
+          if (grade.id === newMatcha.grade_id) {
+            return { ...grade, matchas: [...grade.matchas, newMatcha] };
+          }
+          return grade;
+        });
+  
+        setGrades(updatedGrades);
+  
+        setFormData({ name: "", price: "", origin: "", brand_id: "", grade_id: "" });
       })
-      .then((data) => {
-        navigate("/home");
+      .catch((err) => alert("Error adding matcha."));
+  };
+  
+
+
+  const handleAddBrand = () => {
+    if (!formData.newBrand || !formData.newBrandWebsite) return alert("Brand name and website required!");
+
+    fetch("/brands", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: formData.newBrand, website: formData.newBrandWebsite }),
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((newBrand) => {
+        setBrands([...brands, newBrand]);
+        setFormData({ ...formData, brand_id: newBrand.id, newBrand: "", newBrandWebsite: "" });
+        setShowNewBrandInput(false);
       })
-      .catch((err) => {
-        console.error("Error during matcha creation:", err);
-      });
+      .catch(() => alert("Error adding brand."));
+  };
+
+  const handleAddGrade = () => {
+    if (!formData.newGrade) return alert("Grade name required!");
+
+    fetch("/grades", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ grade: formData.newGrade }),
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((newGrade) => {
+        setGrades([...grades, newGrade]);
+        setFormData({ ...formData, grade_id: newGrade.id, newGrade: "" });
+        setShowNewGradeInput(false);
+      })
+      .catch(() => alert("Error adding grade."));
   };
 
   return (
     <div>
+      <NavBar />
       <h2>Add New Matcha</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Matcha Name:</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
+          <label>Name:</label>
+          <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </div>
+
         <div>
           <label>Price:</label>
-          <input
-            type="number"
-            step="any"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-          />
+          <input type="number" name="price" value={formData.price} onChange={handleChange} required />
         </div>
+
         <div>
           <label>Origin:</label>
-          <input
-            type="text"
-            name="origin"
-            value={formData.origin}
-            onChange={handleChange}
-          />
+          <input type="text" name="origin" value={formData.origin} onChange={handleChange} required />
         </div>
+
         <div>
           <label>Brand:</label>
-          <select
-            name="brand_id"
-            value={formData.brand_id}
-            onChange={handleChange}
-          >
-            <option value="">Select a Brand</option>
+          <select name="brand_id" value={formData.brand_id} onChange={handleChange} required>
+            <option value="">Select a brand</option>
             {brands.map((brand) => (
               <option key={brand.id} value={brand.id}>
                 {brand.name}
               </option>
             ))}
+            <option value="new">Add a new brand</option>
           </select>
-          <button type="button" onClick={() => navigate("/brands/new")}>
-            Add New Brand
-          </button>
         </div>
+
+        {formData.brand_id === "new" && (
+          <div>
+            <input type="text" name="newBrand" placeholder="New Brand Name" value={formData.newBrand} onChange={handleChange} />
+            <input type="text" name="newBrandWebsite" placeholder="Brand Website" value={formData.newBrandWebsite} onChange={handleChange} />
+            <button type="button" onClick={handleAddBrand}>Save Brand</button>
+          </div>
+        )}
+
         <div>
           <label>Grade:</label>
-          <select
-            name="grade_id"
-            value={formData.grade_id}
-            onChange={handleChange}
-          >
-            <option value="">Select a Grade</option>
+          <select name="grade_id" value={formData.grade_id} onChange={handleChange} required>
+            <option value="">Select a grade</option>
             {grades.map((grade) => (
               <option key={grade.id} value={grade.id}>
                 {grade.grade}
               </option>
             ))}
+            <option value="new">Add a new grade</option>
           </select>
-          <button type="button" onClick={() => navigate("/grades/new")}>
-            Add New Grade
-          </button>
         </div>
+
+        {formData.grade_id === "new" && (
+          <div>
+            <input type="text" name="newGrade" placeholder="New Grade" value={formData.newGrade} onChange={handleChange} />
+            <button type="button" onClick={handleAddGrade}>Save Grade</button>
+          </div>
+        )}
+
         <button type="submit">Add Matcha</button>
       </form>
     </div>

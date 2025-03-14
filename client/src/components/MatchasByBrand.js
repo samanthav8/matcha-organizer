@@ -1,5 +1,6 @@
 // src/components/MatchasByBrand.js
 import React, { useContext } from "react";
+import NavBar from "./NavBar";
 import { UserContext } from "../context/UserContext"; 
 
 function MatchasByBrand() {
@@ -7,7 +8,7 @@ function MatchasByBrand() {
 
   return (
     <div>
-
+      <NavBar/>
       <h2>Matchas by Brand</h2>
 
       <div>
@@ -23,7 +24,7 @@ function MatchasByBrand() {
               <ul>
                 {brand.matchas.map((matcha) => (
                   <li key={matcha.id}>
-                    <strong>{matcha.name}</strong> - ${matcha.price.toFixed(2)} - {matcha.origin}
+                    <strong>{matcha.name}</strong> - ${matcha.price} - {matcha.origin}
                   </li>
                 ))}
               </ul>

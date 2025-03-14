@@ -23,6 +23,7 @@ function NavBar() {
       <ul>
         <li><Link to="/home">Home</Link></li>
         <li><Link to="/brands-view">Matchas by Brand</Link></li>
+        <li><Link to="/grades-view">Matchas by Grade</Link></li>
         <li><Link to="/matchas/new">Add New Matcha</Link></li>
         <li><button onClick={handleLogout}>Logout</button></li>
       </ul>
