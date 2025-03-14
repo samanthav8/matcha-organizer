@@ -1,13 +1,15 @@
 // src/components/Signup.js
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext"; 
+
 
 function Signup() {
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
-
-  // lolcal state for form input
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+
 
   //update form data
   const handleChange = (e) => {
@@ -28,8 +30,8 @@ function Signup() {
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
       .then(({ ok, data }) => {
         if (!ok) throw new Error(data.error || "An unexpected error occurred");
-        //redirect to login after success
-        navigate("/login");
+        setUser(data);
+        navigate("/home"); //
       })
       .catch((err) => setError(err.message));
   };

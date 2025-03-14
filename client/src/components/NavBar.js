@@ -1,9 +1,11 @@
 // src/components/NavBar.js
-import React from "react";
+import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
 
-function NavBar({ setUser }) {
+function NavBar() {
   //navigate function to redirect
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
