@@ -30,6 +30,7 @@ class User(db.Model):
     def authenticate(self, password):
         return bcrypt.check_password_hash(self._password_hash, password)
 
+
     def __repr__(self):
         return f'<User id={self.id}, username={self.username}>'
 

@@ -5,36 +5,33 @@ import { useNavigate } from "react-router-dom";
 function Signup() {
   const navigate = useNavigate();
 
-  // Local state for form inputs
-  const [formData, setFormData] = useState({ name: "", password: "" });
+  // lolcal state for form input
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
 
-  // Updates form data when user types
+  //update form data
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handles signup
   const handleSignup = (e) => {
     e.preventDefault();
     setError("");
 
-    // Send signup request to backend
+    // sign up request to backend
     fetch("/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
       credentials: "include",
     })
-      .then((res) => {
-        if (!res.ok) return res.json().then((data) => Promise.reject(data.error));
-        return res.json();
-      })
-      .then(() => {
-        // Redirect to login after successful signup
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) throw new Error(data.error || "An unexpected error occurred");
+        //redirect to login after success
         navigate("/login");
       })
-      .catch((err) => setError(typeof err === "string" ? err : "An unexpected error occurred"));
+      .catch((err) => setError(err.message));
   };
 
   return (
@@ -42,11 +39,11 @@ function Signup() {
       <h2>Create an Account</h2>
       <form onSubmit={handleSignup}>
         <div>
-          <label>Name:</label>
+          <label>Username:</label>
           <input
             type="text"
-            name="name"
-            value={formData.name}
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             required
           />

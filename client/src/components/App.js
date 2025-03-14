@@ -12,6 +12,19 @@ function App() {
   const [user, setUser] = useState(null);
   const location = useLocation(); 
 
+  //change title dynamically
+  useEffect(() => {
+    const pageTitles = {
+      "/": "Matcha Organizer",
+      "/login": "Login | Matcha Organizer",
+      "/signup": "Signup | Matcha Organizer",
+      "/brands-view": "Matcha Brands",
+      "/home": "Welcome Matcha Lover!",
+    };
+
+    document.title = pageTitles[location.pathname] || "Matcha Organizer";
+  }, [location]);
+
   // check session on load
   useEffect(() => {
     fetch("/check_session", { credentials: "include" })

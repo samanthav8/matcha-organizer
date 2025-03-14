@@ -10,17 +10,17 @@ function Login({ setUser }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle login form submit
+  // handle login form submit
   const handleLogin = (e) => {
     e.preventDefault();
     setError("");
 
-    // Login request sent to backend
+    //login request
     fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
-      // Include authentication cookies
+      // include authentication cookies
       credentials: "include",
     })
       .then((res) => res.json())
@@ -37,10 +37,10 @@ function Login({ setUser }) {
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <div>
-          <label>Username:</label> {/* Updated from "Name" to "Username" */}
+          <label>Username:</label>
           <input 
             type="text" 
-            name="username"  /* Updated from "name" */
+            name="username" 
             value={formData.username} 
             onChange={handleChange} 
             required 
