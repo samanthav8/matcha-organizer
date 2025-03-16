@@ -4,6 +4,7 @@ import NavBar from "./NavBar";
 import { UserContext } from "../context/UserContext";
 
 function NewMatchaForm() {
+  //all brands alll grades local state
   const { user, brands, setBrands, grades, setGrades } = useContext(UserContext);
   const [formData, setFormData] = useState({
     name: "",
@@ -36,7 +37,7 @@ function NewMatchaForm() {
       brand_id: formData.brand_id,
       grade_id: formData.grade_id,
     };
-  
+    //into context so it would have new matcha and post in that form
     fetch("/matchas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -46,16 +47,6 @@ function NewMatchaForm() {
       .then((res) => res.json())
       .then((newMatcha) => {
         alert("Matcha added successfully!");
-  
-        // const updatedGrades = grades.map((grade) => {
-        //   if (grade.id === newMatcha.grade_id) {
-        //     return { ...grade, matchas: [...grade.matchas, newMatcha] };
-        //   }
-        //   return grade;
-        // });
-  
-        // setGrades(updatedGrades);
-  
         setFormData({ name: "", price: "", origin: "", brand_id: "", grade_id: "" });
       })
       .catch((err) => alert("Error adding matcha."));
