@@ -40,17 +40,6 @@ function NewMatchaForm() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    // if (e.target.name === "brand_id" && e.target.value === "new") {
-    //   setShowNewBrandInput(true);
-    // } else if (e.target.name === "brand_id") {
-    //   setShowNewBrandInput(false);
-    // }
-
-    // if (e.target.name === "grade_id" && e.target.value === "new") {
-    //   setShowNewGradeInput(true);
-    // } else if (e.target.name === "grade_id") {
-    //   setShowNewGradeInput(false);
-    // }
   };
 
 
