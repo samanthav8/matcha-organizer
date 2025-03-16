@@ -4,7 +4,7 @@ import NavBar from "./NavBar";
 import { UserContext } from "../context/UserContext"; 
 
 function MatchasByBrand() {
-  const { brands } = useContext(UserContext);
+  const { userBrands } = useContext(UserContext);
 
   return (
     <div>
@@ -12,8 +12,8 @@ function MatchasByBrand() {
       <h2>Matchas by Brand</h2>
 
       <div>
-        {brands.length > 0 ? (
-          brands.map((brand) => (
+        {userBrands?.length > 0 ? (
+          userBrands.map((brand) => (
             <div key={brand.id}>
               <h3>{brand.name}</h3>
               <p>
@@ -22,7 +22,7 @@ function MatchasByBrand() {
                 </a>
               </p>
               <ul>
-                {brand.matchas.map((matcha) => (
+                {brand.matchas?.map((matcha) => (
                   <li key={matcha.id}>
                     <strong>{matcha.name}</strong> - ${matcha.price} - {matcha.origin}
                   </li>

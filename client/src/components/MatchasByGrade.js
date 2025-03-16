@@ -1,24 +1,24 @@
 // src/components/MatchasByGrade.js
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 import NavBar from "./NavBar";
 
 function MatchasByGrade() {
-  const { grades } = useContext(UserContext);
+  const { userGrades } = useContext(UserContext);
 
   return (
     <div>
       <NavBar />
       <h2>Matchas by Grade</h2>
 
-      {grades.length === 0 ? (
+      {userGrades?.length === 0 ? (
         <p>No matchas found for this user.</p>
       ) : (
-        grades.map((grade) => (
+        userGrades.map((grade) => (
           <div key={grade.id}>
             <h3>{grade.grade}</h3>
             <ul>
-              {grade.matchas.map((matcha) => (
+              {grade.matchas?.map((matcha) => (
                 <li key={matcha.id}>
                   {matcha.name} - ${matcha.price} ({matcha.origin})
                 </li>
@@ -32,4 +32,3 @@ function MatchasByGrade() {
 }
 
 export default MatchasByGrade;
-

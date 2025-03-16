@@ -1,11 +1,17 @@
 // src/components/NewMatchaForm.js
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import NavBar from "./NavBar";
 import { UserContext } from "../context/UserContext";
 
 function NewMatchaForm() {
   //all brands alll grades local state
-  const { user, brands, setBrands, grades, setGrades } = useContext(UserContext);
+  const { user, addNewMatcha } = useContext(UserContext);
+  const [brands, setBrands] = useState([]);
+  const [grades, setGrades] = useState([]);
+  const [showNewBrandInput, setShowNewBrandInput] = useState(false);
+  const [showNewGradeInput, setShowNewGradeInput] = useState(false);
+
+
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -17,18 +23,41 @@ function NewMatchaForm() {
     newGrade: "",
   });
 
-  const [showNewBrandInput, setShowNewBrandInput] = useState(false);
-  const [showNewGradeInput, setShowNewGradeInput] = useState(false);
+  // fetch brands and grades
+  useEffect(() => {
+    fetch("/brands")
+      .then((res) => res.json())
+      .then(setBrands)
+      .catch(() => alert("Failed to load brands"));
+
+    fetch("/grades")
+      .then((res) => res.json())
+      .then(setGrades)
+      .catch(() => alert("Failed to load grades"));
+  }, []);
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    // if (e.target.name === "brand_id" && e.target.value === "new") {
+    //   setShowNewBrandInput(true);
+    // } else if (e.target.name === "brand_id") {
+    //   setShowNewBrandInput(false);
+    // }
+
+    // if (e.target.name === "grade_id" && e.target.value === "new") {
+    //   setShowNewGradeInput(true);
+    // } else if (e.target.name === "grade_id") {
+    //   setShowNewGradeInput(false);
+    // }
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
     if (!user) return alert("You must be logged in to add matcha.");
-  
+
     const matchaData = {
       name: formData.name,
       price: parseFloat(formData.price),
@@ -37,21 +66,12 @@ function NewMatchaForm() {
       brand_id: formData.brand_id,
       grade_id: formData.grade_id,
     };
-    //into context so it would have new matcha and post in that form
-    fetch("/matchas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(matchaData),
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((newMatcha) => {
-        alert("Matcha added successfully!");
-        setFormData({ name: "", price: "", origin: "", brand_id: "", grade_id: "" });
-      })
-      .catch((err) => alert("Error adding matcha."));
+
+    addNewMatcha(matchaData, () => {
+      alert("Matcha added successfully!");
+      setFormData({ name: "", price: "", origin: "", brand_id: "", grade_id: "" });
+    });
   };
-  
 
 
   const handleAddBrand = () => {
