@@ -33,8 +33,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/brands-view" element={<MatchasByBrand />} />
-        <Route path="/grades-view" element={<MatchasByGrade />} />
+        <Route path="/brands" element={<MatchasByBrand />} />
+        <Route path="/grades" element={<MatchasByGrade />} />
         <Route path="/home" element={<Home />} />
         <Route path="/matchas/new" element={<NewMatchaForm setBrands={setBrands} setGrades={setGrades} />} />
         <Route path="/" element={<Home />} />

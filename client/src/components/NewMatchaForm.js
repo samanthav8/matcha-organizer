@@ -47,14 +47,14 @@ function NewMatchaForm() {
       .then((newMatcha) => {
         alert("Matcha added successfully!");
   
-        const updatedGrades = grades.map((grade) => {
-          if (grade.id === newMatcha.grade_id) {
-            return { ...grade, matchas: [...grade.matchas, newMatcha] };
-          }
-          return grade;
-        });
+        // const updatedGrades = grades.map((grade) => {
+        //   if (grade.id === newMatcha.grade_id) {
+        //     return { ...grade, matchas: [...grade.matchas, newMatcha] };
+        //   }
+        //   return grade;
+        // });
   
-        setGrades(updatedGrades);
+        // setGrades(updatedGrades);
   
         setFormData({ name: "", price: "", origin: "", brand_id: "", grade_id: "" });
       })
