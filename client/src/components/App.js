@@ -1,7 +1,6 @@
 // src/components/App.js
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { UserContext } from "../context/UserContext"; 
 import Home from "./Home";
 import Login from "./Login";
 import Signup from "./Signup";
@@ -10,7 +9,6 @@ import MatchasByGrade from "./MatchasByGrade";
 import NewMatchaForm from "./NewMatchaForm";
 
 function App() {
-  const { brands, setBrands, grades, setGrades } = useContext(UserContext);
   const location = useLocation(); 
 
   // change title dynamically
@@ -36,7 +34,7 @@ function App() {
         <Route path="/brands" element={<MatchasByBrand />} />
         <Route path="/grades" element={<MatchasByGrade />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/matchas/new" element={<NewMatchaForm setBrands={setBrands} setGrades={setGrades} />} />
+        <Route path="/matchas/new" element={<NewMatchaForm />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </div>

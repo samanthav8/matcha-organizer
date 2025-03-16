@@ -2,8 +2,19 @@
 
 from flask import request, jsonify, session, make_response
 from flask_restful import Resource
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from config import app, db, api
 from models import User, Matcha, Brand, Grade
+
+# initialize flask login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+# define user_loader function for flask login
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/')
 def index():
@@ -14,32 +25,73 @@ class Login(Resource):
         data = request.get_json()
         if not data or 'username' not in data or 'password' not in data:
             return make_response(jsonify({"error": "Username and password required"}), 400)
-        
-        user = User.query.filter_by(username=data['username']).first()
+
+        #convert username to lowercase
+        username_lower = data['username'].lower() 
+
+        # case insensitive username lookup
+        user = User.query.filter(db.func.lower(User.username) == username_lower).first()
         if user is None:
             return make_response(jsonify({"error": "User not found"}), 404)
 
-        if user.authenticate(data['password']): 
-            session['user_id'] = user.id 
-            return make_response(jsonify({"id": user.id, "username": user.username}), 200)
+        if user.authenticate(data['password']):
+            #login user with flask login
+            login_user(user) 
+
+            # return full user response like check session
+            user_matchas = Matcha.query.filter_by(user_id=user.id).all()
+            user_brands = {}
+            user_grades = {}
+
+            for matcha in user_matchas:
+                matcha_data = {
+                    "origin": matcha.origin,
+                    "user_id": matcha.user_id,
+                    "id": matcha.id,
+                    "name": matcha.name,
+                    "price": matcha.price,
+                    "brand_id": matcha.brand_id,
+                    "grade_id": matcha.grade_id,
+                }
+
+                if matcha.brand_id not in user_brands:
+                    user_brands[matcha.brand_id] = {
+                        "id": matcha.brand.id,
+                        "name": matcha.brand.name,
+                        "website": matcha.brand.website,
+                        "matchas": []
+                    }
+                user_brands[matcha.brand_id]["matchas"].append(matcha_data)
+
+                if matcha.grade_id not in user_grades:
+                    user_grades[matcha.grade_id] = {
+                        "id": matcha.grade.id,
+                        "grade": matcha.grade.grade,
+                        "matchas": []
+                    }
+                user_grades[matcha.grade_id]["matchas"].append(matcha_data)
+
+            return make_response(jsonify({
+                "id": user.id,
+                "username": user.username,
+                "brands": list(user_brands.values()),
+                "grades": list(user_grades.values())
+            }), 200)
 
         return make_response(jsonify({"error": "Invalid credentials"}), 401)
 
 
 
+
 class CheckSession(Resource):
     def get(self):
-        user_id = session.get('user_id')
-
-        if not user_id:
+        if not current_user.is_authenticated:
             return make_response(jsonify({"error": "Unauthorized"}), 401)
+        #use flask logins current user
+        user = current_user 
 
-        user = User.query.get(user_id)
-        if not user:
-            return make_response(jsonify({"error": "User not found"}), 404)
-
-        # get only users matchas
-        user_matchas = Matcha.query.filter_by(user_id=user_id).all()
+        #get only that users matchas
+        user_matchas = Matcha.query.filter_by(user_id=user.id).all()
 
         user_brands = {}
         user_grades = {}
@@ -79,52 +131,57 @@ class CheckSession(Resource):
             "grades": list(user_grades.values())
         }), 200)
 
+
+# flask logout route
 class Logout(Resource):
+    @login_required
     def delete(self):
-        # Remove user from session
-        session.pop('user_id', None)
+        #use flosk login to logout user
+        logout_user() 
         return {"message": "Logged out successfully"}, 204
 
-#get and create users
+# user registration
 class Users(Resource):
     def get(self):
         users = User.query.all()
         return make_response(jsonify([{"id": user.id, "username": user.username} for user in users]), 200)
-    
+
     def post(self):
         data = request.get_json()
         if not data or 'username' not in data or 'password' not in data:
             return make_response(jsonify({"error": "Username and password are required"}), 400)
-        
-        #check if username exists
-        existing_user = User.query.filter_by(username=data["username"]).first()
+
+        #username to lowercase
+        username_lower = data["username"].lower()
+
+        #case insensitive uniqueness check
+        existing_user = User.query.filter(db.func.lower(User.username) == username_lower).first()
         if existing_user:
             return make_response(jsonify({"error": "Username already exists"}), 400)
-        
-        #create a new user
-        new_user = User(username=data["username"])
-        #uses setter to hash passsword
+
+        #store username in lowercase
+        new_user = User(username=username_lower)
         new_user.password_hash = data["password"]
         db.session.add(new_user)
         db.session.commit()
 
-        # return json
-        return make_response(jsonify({"id": new_user.id, "username": new_user.username}), 201)
+        # return response user was created
+        return make_response(jsonify({
+            "id": new_user.id,
+            "username": new_user.username
+        }), 201)
+
 
 
 
 class Matchas(Resource):
-    def get(self):
-        matchas = Matcha.query.all()
-        return jsonify([matcha.to_dict() for matcha in matchas])
-    
     def post(self):
         data = request.get_json()
         required_fields = ["name", "price", "origin", "user_id", "brand_id", "grade_id"]
         if not data or any(field not in data for field in required_fields):
             return {"error": f"Missing required fields. Required fields: {required_fields}"}, 400
         
-        # create a new matcha
+        #create new matcha
         new_matcha = Matcha(
             name=data["name"],
             price=data["price"],
@@ -135,7 +192,21 @@ class Matchas(Resource):
         )
         db.session.add(new_matcha)
         db.session.commit()
-        return new_matcha.to_dict(), 201
+
+        # return matcha
+        return {
+            "id": new_matcha.id,
+            "name": new_matcha.name,
+            "price": new_matcha.price,
+            "origin": new_matcha.origin,
+            "user_id": new_matcha.user_id,
+            "brand_id": new_matcha.brand_id,
+            "brand_name": new_matcha.brand.name,
+            "brand_website": new_matcha.brand.website,
+            "grade_id": new_matcha.grade_id,
+            "grade_name": new_matcha.grade.grade,
+        }, 201
+
 
 
 class MatchaByID(Resource):
@@ -192,14 +263,14 @@ class Brands(Resource):
 class Grades(Resource):
     def get(self):
         grades = Grade.query.all()
-        return jsonify([grade.to_dict() for grade in grades] if grades else [])  # ✅ Ensure it returns an array
+        return jsonify([grade.to_dict() for grade in grades] if grades else [])
     
     def post(self):
         data = request.get_json()
         if not data or 'grade' not in data:
             return {"error": "Grade is required"}, 400
         
-        # Create new grade
+        #create new grade
         new_grade = Grade(grade=data["grade"])
         db.session.add(new_grade)
         db.session.commit()

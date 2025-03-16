@@ -1,45 +1,34 @@
-// src/components/Signup.js
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../context/UserContext"; 
-
+import { UserContext } from "../context/UserContext";
 
 function Signup() {
-  const { setUser } = useContext(UserContext);
+  const { handleSignup } = useContext(UserContext);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
-
 
   //update form data
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSignup = (e) => {
+  //handles signup redirects to login
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
 
-    // sign up request to backend
-    fetch("/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-      credentials: "include",
-    })
-      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (!ok) throw new Error(data.error || "An unexpected error occurred");
-        setUser(data);
-        navigate("/home"); //
-      })
-      .catch((err) => setError(err.message));
+    handleSignup(formData, () => {
+      alert("User created successfully! Please login.");
+      navigate("/login");
+    }, setError);
   };
+
 
   return (
     <div>
       <h2>Create an Account</h2>
-      <form onSubmit={handleSignup}>
+      <form onSubmit={handleSubmit}>
         <div>
           <label>Username:</label>
           <input

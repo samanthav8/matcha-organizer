@@ -1,15 +1,13 @@
 # Standard library imports
-
-# Remote library imports
-from flask import Flask, session
-from flask_cors import CORS
-from flask_migrate import Migrate
-from flask_restful import Api
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData
 import os
 
-# Local imports
+# Remote library imports
+from flask import Flask
+from flask_cors import CORS
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from sqlalchemy import MetaData
 
 # Instantiate app, set attributes
 app = Flask(__name__)
@@ -32,7 +30,22 @@ migrate = Migrate(app, db)
 db.init_app(app)
 
 # Instantiate REST API
+from flask_restful import Api
 api = Api(app)
 
-# Instantiate CORS and supports requests with cookies
+# Instantiate CORS to support requests with cookies
 CORS(app, supports_credentials=True)
+
+#Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Redirect unauthorized users to login
+login_manager.login_view = "login" 
+
+# Define user_loader function for Flask-Login
+from models import User
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))

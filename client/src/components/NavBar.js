@@ -5,17 +5,12 @@ import { UserContext } from "../context/UserContext";
 
 function NavBar() {
   //navigate function to redirect
-  const { setUser } = useContext(UserContext);
+  const { handleLogout } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    fetch("/logout", { method: "DELETE", credentials: "include" })
-      .then(() => {
-        setUser(null);
-        //clear last page
-        localStorage.removeItem("lastPage"); 
-        navigate("/login");
-      });
+  const handleLogoutClick = () => {
+    handleLogout();
+    navigate("/login");
   };
 
   return (
@@ -25,7 +20,7 @@ function NavBar() {
         <li><Link to="/brands">Matchas by Brand</Link></li>
         <li><Link to="/grades">Matchas by Grade</Link></li>
         <li><Link to="/matchas/new">Add New Matcha</Link></li>
-        <li><button onClick={handleLogout}>Logout</button></li>
+        <li><button onClick={handleLogoutClick}>Logout</button></li>
       </ul>
     </nav>
   );

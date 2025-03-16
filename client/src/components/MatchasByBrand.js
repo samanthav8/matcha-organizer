@@ -12,7 +12,7 @@ function MatchasByBrand() {
       <h2>Matchas by Brand</h2>
 
       <div>
-        {userBrands?.length > 0 ? (
+        {userBrands.length > 0 ? (
           userBrands.map((brand) => (
             <div key={brand.id}>
               <h3>{brand.name}</h3>
@@ -22,7 +22,7 @@ function MatchasByBrand() {
                 </a>
               </p>
               <ul>
-                {brand.matchas?.map((matcha) => (
+                {brand.matchas.map((matcha) => (
                   <li key={matcha.id}>
                     <strong>{matcha.name}</strong> - ${matcha.price} - {matcha.origin}
                   </li>

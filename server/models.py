@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
 from flask_bcrypt import Bcrypt
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -12,7 +13,7 @@ from config import db
 
 # Models go here!
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -30,9 +31,14 @@ class User(db.Model):
     def authenticate(self, password):
         return bcrypt.check_password_hash(self._password_hash, password)
 
+    # required for flask login
+    def get_id(self):
+        #flask login expects a string
+        return str(self.id)
 
     def __repr__(self):
         return f'<User id={self.id}, username={self.username}>'
+
 
 class Brand(db.Model, SerializerMixin):
     __tablename__ = 'brands'

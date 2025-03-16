@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
 function Login() {
-  const { setUser } = useContext(UserContext);
+  const { handleLogin } = useContext(UserContext);
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -13,31 +13,17 @@ function Login() {
   };
 
   // handle login form submit
-  const handleLogin = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
 
-    //login request
-    fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-      // include authentication cookies
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) throw new Error(data.error);
-        setUser(data);
-        navigate("/home");
-      })
-      .catch((err) => setError(err.message));
+    handleLogin(formData, () => navigate("/home"), setError);
   };
 
   return (
     <div>
       <h2>Login</h2>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleSubmit}>
         <div>
           <label>Username:</label>
           <input 
