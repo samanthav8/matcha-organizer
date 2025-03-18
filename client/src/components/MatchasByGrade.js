@@ -1,7 +1,8 @@
 // src/components/MatchasByGrade.js
 import React, { useContext } from "react";
-import { UserContext } from "../context/UserContext";
+import { Link } from "react-router-dom";
 import NavBar from "./NavBar";
+import { UserContext } from "../context/UserContext";
 
 function MatchasByGrade() {
   const { userGrades } = useContext(UserContext);
@@ -21,6 +22,9 @@ function MatchasByGrade() {
               {grade.matchas.map((matcha) => (
                 <li key={matcha.id}>
                   {matcha.name} - ${matcha.price} ({matcha.origin})
+                  <Link to={`/matchas/${matcha.id}`}>
+                    <button>See Details</button>
+                  </Link>
                 </li>
               ))}
             </ul>

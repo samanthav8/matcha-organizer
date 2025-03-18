@@ -7,6 +7,8 @@ import Signup from "./Signup";
 import MatchasByBrand from "./MatchasByBrand";
 import MatchasByGrade from "./MatchasByGrade"; 
 import NewMatchaForm from "./NewMatchaForm";
+import MatchaDetails from "./MatchaDetails";
+import EditMatchaForm from "./EditMatchaForm";
 
 function App() {
   const location = useLocation(); 
@@ -33,6 +35,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/brands" element={<MatchasByBrand />} />
         <Route path="/grades" element={<MatchasByGrade />} />
+        <Route path="/matchas/:id" element={<MatchaDetails />} />
         <Route path="/home" element={<Home />} />
         <Route path="/matchas/new" element={<NewMatchaForm />} />
         <Route path="/" element={<Home />} />

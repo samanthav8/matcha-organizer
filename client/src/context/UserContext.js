@@ -88,7 +88,6 @@ export function UserProvider({ children }) {
     }
     
     
-    
 
   // add new matcha function
   function addNewMatcha(matchaData, onSuccess) {
@@ -153,6 +152,7 @@ export function UserProvider({ children }) {
       })
       .catch(() => alert("Error adding matcha."));
   }
+
   
 
   return (
@@ -161,7 +161,8 @@ export function UserProvider({ children }) {
       userBrands, setUserBrands, 
       userGrades, setUserGrades, 
       handleLogin,handleSignup, 
-      handleLogout, addNewMatcha
+      handleLogout, addNewMatcha,
+      getMatchaById
     }}>
       {children}
     </UserContext.Provider>
