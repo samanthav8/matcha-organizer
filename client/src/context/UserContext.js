@@ -153,16 +153,13 @@ export function UserProvider({ children }) {
       .catch(() => alert("Error adding matcha."));
   }
 
-  
-
   return (
     <UserContext.Provider value={{ 
       user, setUser, 
       userBrands, setUserBrands, 
       userGrades, setUserGrades, 
       handleLogin,handleSignup, 
-      handleLogout, addNewMatcha,
-      getMatchaById
+      handleLogout, addNewMatcha
     }}>
       {children}
     </UserContext.Provider>

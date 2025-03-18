@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import "../styles/style.css"; 
 
 function Signup() {
   const { handleSignup } = useContext(UserContext);
@@ -26,37 +27,31 @@ function Signup() {
 
 
   return (
-    <div>
-      <h2>Create an Account</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
+    <div className="form-container">
+      <form className="form-card" onSubmit={handleSubmit}>
+        <h2 className="form-title">My Matcha Collection</h2>
+        <h3 className="form-subtitle">Create an Account</h3>
+
+        <div className="form-group">
           <label>Username:</label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
+          <input type="text" name="username" value={formData.username} onChange={handleChange} required />
         </div>
-        <div>
+
+        <div className="form-group">
           <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+          <input type="password" name="password" value={formData.password} onChange={handleChange} required />
         </div>
-        <button type="submit">Sign Up</button>
+
+        <div className="form-buttons">
+          <button type="submit" className="button-small">Sign Up</button>
+          <button type="button" className="button-small" onClick={() => navigate("/login")}>Back to Login</button>
+        </div>
+
+        {error && <p className="error-text">{error}</p>}
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <div>
-        <button onClick={() => navigate("/login")}>Back to Login</button>
-      </div>
     </div>
   );
+
 }
 
 export default Signup;

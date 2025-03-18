@@ -2,6 +2,7 @@
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import "../styles/style.css"; 
 
 function NavBar() {
   //navigate function to redirect
@@ -14,15 +15,16 @@ function NavBar() {
   };
 
   return (
-    <nav>
-      <ul>
-        <li><Link to="/home">Home</Link></li>
-        <li><Link to="/brands">Matchas by Brand</Link></li>
-        <li><Link to="/grades">Matchas by Grade</Link></li>
-        <li><Link to="/matchas/new">Add New Matcha</Link></li>
-        <li><button onClick={handleLogoutClick}>Logout</button></li>
-      </ul>
-    </nav>
+    <div className="navbar-container">
+      <h1 className="navbar-title">‧₊˚ ⋅  𓐐𓎩 ‧₊˚ ⋅My Matcha Collection‧₊˚ ⋅  𓐐𓎩 ‧₊˚ ⋅</h1>
+      <div className="navbar-links">
+        <Link className="button" to="/home">Home</Link>
+        <Link className="button" to="/brands">Matchas by Brand</Link>
+        <Link className="button" to="/grades">Matchas by Grade</Link>
+        <Link className="button" to="/matchas/new">Add New Matcha</Link>
+        <button className="button" onClick={handleLogoutClick}>Logout</button>
+      </div>
+    </div>
   );
 }
 

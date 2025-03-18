@@ -102,68 +102,74 @@ function NewMatchaForm() {
   return (
     <div>
       <NavBar />
-      <h2>Add New Matcha</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name:</label>
-          <input type="text" name="name" value={formData.name} onChange={handleChange} required />
-        </div>
+      <div className="form-container">
+        <form className="form-card" onSubmit={handleSubmit}>
+          <h3 className="form-subtitle">‧₊˚ ⋅ 𓐐𓎩 ‧₊˚ ⋅ Add New Matcha‧₊˚ ⋅ 𓐐𓎩 ‧₊˚ ⋅ </h3>
 
-        <div>
-          <label>Price:</label>
-          <input type="number" name="price" value={formData.price} onChange={handleChange} required />
-        </div>
-
-        <div>
-          <label>Origin:</label>
-          <input type="text" name="origin" value={formData.origin} onChange={handleChange} required />
-        </div>
-
-        <div>
-          <label>Brand:</label>
-          <select name="brand_id" value={formData.brand_id} onChange={handleChange} required>
-            <option value="">Select a brand</option>
-            {brands.map((brand) => (
-              <option key={brand.id} value={brand.id}>
-                {brand.name}
-              </option>
-            ))}
-            <option value="new">Add a new brand</option>
-          </select>
-        </div>
-
-        {formData.brand_id === "new" && (
-          <div>
-            <input type="text" name="newBrand" placeholder="New Brand Name" value={formData.newBrand} onChange={handleChange} />
-            <input type="text" name="newBrandWebsite" placeholder="Brand Website" value={formData.newBrandWebsite} onChange={handleChange} />
-            <button type="button" onClick={handleAddBrand}>Save Brand</button>
+          <div className="form-group">
+            <label>Name:</label>
+            <input type="text" name="name" value={formData.name} onChange={handleChange} required />
           </div>
-        )}
 
-        <div>
-          <label>Grade:</label>
-          <select name="grade_id" value={formData.grade_id} onChange={handleChange} required>
-            <option value="">Select a grade</option>
-            {grades.map((grade) => (
-              <option key={grade.id} value={grade.id}>
-                {grade.grade}
-              </option>
-            ))}
-            <option value="new">Add a new grade</option>
-          </select>
-        </div>
-
-        {formData.grade_id === "new" && (
-          <div>
-            <input type="text" name="newGrade" placeholder="New Grade" value={formData.newGrade} onChange={handleChange} />
-            <button type="button" onClick={handleAddGrade}>Save Grade</button>
+          <div className="form-group">
+            <label>Price:</label>
+            <input type="number" name="price" value={formData.price} onChange={handleChange} required />
           </div>
-        )}
 
-        <button type="submit">Add Matcha</button>
-      </form>
+          <div className="form-group">
+            <label>Origin:</label>
+            <input type="text" name="origin" value={formData.origin} onChange={handleChange} required />
+          </div>
+
+          <div className="form-group">
+            <label>Brand:</label>
+            <select name="brand_id" value={formData.brand_id} onChange={handleChange} required>
+              <option value="">Select a brand</option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.name}
+                </option>
+              ))}
+              <option value="new">Add a new brand</option>
+            </select>
+          </div>
+
+          {formData.brand_id === "new" && (
+            <div className="form-group">
+              <input type="text" name="newBrand" placeholder="New Brand Name" value={formData.newBrand} onChange={handleChange} />
+              <input type="text" name="newBrandWebsite" placeholder="Brand Website" value={formData.newBrandWebsite} onChange={handleChange} />
+              <button type="button" className="button-small" onClick={handleAddBrand}>Save Brand</button>
+            </div>
+          )}
+
+          <div className="form-group">
+            <label>Grade:</label>
+            <select name="grade_id" value={formData.grade_id} onChange={handleChange} required>
+              <option value="">Select a grade</option>
+              {grades.map((grade) => (
+                <option key={grade.id} value={grade.id}>
+                  {grade.grade}
+                </option>
+              ))}
+              <option value="new">Add a new grade</option>
+            </select>
+          </div>
+
+          {formData.grade_id === "new" && (
+            <div className="form-group">
+              <input type="text" name="newGrade" placeholder="New Grade" value={formData.newGrade} onChange={handleChange} />
+              <button type="button" className="button-small" onClick={handleAddGrade}>Save Grade</button>
+            </div>
+          )}
+          <div className="form-buttons">
+            <button type="submit" className="button">Add Matcha</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
+
+
 }
 
 export default NewMatchaForm;

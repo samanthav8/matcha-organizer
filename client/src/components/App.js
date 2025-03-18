@@ -9,6 +9,7 @@ import MatchasByGrade from "./MatchasByGrade";
 import NewMatchaForm from "./NewMatchaForm";
 import MatchaDetails from "./MatchaDetails";
 import EditMatchaForm from "./EditMatchaForm";
+import "../styles/style.css"; 
 
 function App() {
   const location = useLocation(); 
@@ -17,11 +18,11 @@ function App() {
   useEffect(() => {
     const pageTitles = {
       "/": "Matcha Organizer",
-      "/login": "Login | Matcha Organizer",
-      "/signup": "Signup | Matcha Organizer",
-      "/brands-view": "Matcha Brands",
-      "/grades-view": "Matcha Grades",
-      "/home": "Welcome Matcha Lover!",
+      "/login": "Login to My Matcha Collection",
+      "/signup": "Signup for My Matcha Collection",
+      "/brands": "My Matchas By Brands",
+      "/grades": "My Matchas By Grades",
+      "/home": "Welcome Matcha Loverㅤ♡",
       "/matchas/new": "Add New Matcha"
     };
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/matchas/:id" element={<MatchaDetails />} />
         <Route path="/home" element={<Home />} />
         <Route path="/matchas/new" element={<NewMatchaForm />} />
+        <Route path="/matchas/:id/edit" element={<EditMatchaForm />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </div>
