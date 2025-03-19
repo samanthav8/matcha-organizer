@@ -180,6 +180,7 @@ class Users(Resource):
 
 
 class Matchas(Resource):
+    @login_required
     def post(self):
         data = request.get_json()
         required_fields = ["name", "price", "origin", "user_id", "brand_id", "grade_id"]
@@ -215,6 +216,7 @@ class Matchas(Resource):
 
 
 class MatchaByID(Resource):
+    @login_required
     def get(self, id):
         #get specific matcha
         matcha = Matcha.query.get(id)
@@ -222,6 +224,7 @@ class MatchaByID(Resource):
             return matcha.to_dict(), 200
         return {"error": "Matcha not found"}, 404
     
+    @login_required
     def patch(self, id):
         #get specific matcha
         matcha = Matcha.query.get(id)
@@ -235,6 +238,7 @@ class MatchaByID(Resource):
         db.session.commit()
         return matcha.to_dict(), 200
     
+    @login_required
     def delete(self, id):
         #get specific matcha
         matcha = Matcha.query.get(id)

@@ -1,5 +1,7 @@
 // src/context/UserContext.js
 import React, { createContext, useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; 
+
 
 export const UserContext = createContext(); 
 
@@ -7,12 +9,23 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userBrands, setUserBrands] = useState([]);
   const [userGrades, setUserGrades] = useState([]);  
+  const navigate = useNavigate();
+  const location = useLocation();
 
-
+  const publicPages = ["/login", "/signup"];
   //fetch user session once app loads
   useEffect(() => {
     fetch("/check_session", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((res) => {
+        if (res.status === 401) {
+          setUser(null);
+          // redirect to login if the user is on a protected page
+          if (!publicPages.includes(location.pathname)) {
+            navigate("/login");
+          }
+        }
+        return res.ok ? res.json() : Promise.reject();
+      })
       .then((data) => {
         setUser(data);
         setUserBrands(data.brands || []);
@@ -23,7 +36,7 @@ export function UserProvider({ children }) {
         setUserBrands([]);
         setUserGrades([]);
       });
-  }, []);
+  }, [navigate, location]);
 
     // handle login and update state immediately
     function handleLogin(credentials, onSuccess, onError) {
@@ -60,6 +73,7 @@ export function UserProvider({ children }) {
           setUser(null);
           setUserBrands([]);
           setUserGrades([]);
+          navigate("/login");  // Redirect to login after logout
         })
         .catch(() => alert("Logout failed!"));
     }
