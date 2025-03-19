@@ -153,13 +153,62 @@ export function UserProvider({ children }) {
       .catch(() => alert("Error adding matcha."));
   }
 
+  function updateMatcha(matchaId, updatedData, onSuccess, onError) {
+    fetch(`/matchas/${matchaId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedData),
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((updatedMatcha) => {
+        if (updatedMatcha.error) throw new Error(updatedMatcha.error);
+  
+        // ✅ Update userBrands
+        setUserBrands((prevBrands) =>
+          prevBrands.map((brand) =>
+            brand.id === updatedMatcha.brand_id
+              ? {
+                  ...brand,
+                  matchas: brand.matchas.map((matcha) =>
+                    matcha.id === updatedMatcha.id ? updatedMatcha : matcha
+                  ),
+                }
+              : brand
+          )
+        );
+  
+        // ✅ Update userGrades
+        setUserGrades((prevGrades) =>
+          prevGrades.map((grade) =>
+            grade.id === updatedMatcha.grade_id
+              ? {
+                  ...grade,
+                  matchas: grade.matchas.map((matcha) =>
+                    matcha.id === updatedMatcha.id ? updatedMatcha : matcha
+                  ),
+                }
+              : grade
+          )
+        );
+  
+        if (onSuccess) onSuccess();
+      })
+      .catch((err) => {
+        if (onError) onError(err.message);
+      });
+  }
+  
+
+
+
   return (
     <UserContext.Provider value={{ 
       user, setUser, 
       userBrands, setUserBrands, 
       userGrades, setUserGrades, 
       handleLogin,handleSignup, 
-      handleLogout, addNewMatcha
+      handleLogout, addNewMatcha,
     }}>
       {children}
     </UserContext.Provider>

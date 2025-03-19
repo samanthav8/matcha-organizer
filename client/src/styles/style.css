@@ -240,3 +240,36 @@ body {
     gap: 20px; 
     margin-top: 15px;
 }
+
+/* Matcha Details Styling */
+.matcha-details-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+}
+
+.matcha-details-card {
+    background: #c1dc8a; 
+    padding: 30px;
+    border-radius: 15px;
+    width: 420px;
+    text-align: center;
+}
+
+.matcha-details-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #f9fbf3;
+    font-family: "Georgia", serif;
+    margin-bottom: 15px;
+}
+
+.matcha-details-text {
+    font-size: 18px;
+    color: #f9fbf3;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
