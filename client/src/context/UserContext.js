@@ -8,6 +8,7 @@ export function UserProvider({ children }) {
   const [userBrands, setUserBrands] = useState([]);
   const [userGrades, setUserGrades] = useState([]);  
 
+
   //fetch user session once app loads
   useEffect(() => {
     fetch("/check_session", { credentials: "include" })
@@ -167,7 +168,7 @@ export function UserProvider({ children }) {
               ...brand,
               matchas: brand.matchas.filter((matcha) => matcha.id !== matchaId),
             }))
-            .filter((brand) => brand.matchas.length > 0) // Remove empty brands
+            .filter((brand) => brand.matchas.length > 0) 
         );
   
         setUserGrades((prevGrades) =>
@@ -176,7 +177,7 @@ export function UserProvider({ children }) {
               ...grade,
               matchas: grade.matchas.filter((matcha) => matcha.id !== matchaId),
             }))
-            .filter((grade) => grade.matchas.length > 0) // Remove empty grades
+            .filter((grade) => grade.matchas.length > 0) 
         );
   
         if (onSuccess) onSuccess();
@@ -186,16 +187,54 @@ export function UserProvider({ children }) {
       });
   }
   
+  // update matcha
+  function updateMatcha(matchaId, updatedData, onSuccess, onError) {
+    fetch(`/matchas/${matchaId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedData),
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((updatedMatcha) => {
+        if (updatedMatcha.error) throw new Error(updatedMatcha.error);
 
+        //update matcha in brands
+        setUserBrands((prevBrands) => 
+          prevBrands.map((brand) => ({
+            ...brand,
+            matchas: brand.matchas.map((matcha) =>
+              matcha.id === matchaId ? updatedMatcha : matcha
+            ),
+          }))
+        );
+
+        //update matcha in grades
+        setUserGrades((prevGrades) => 
+          prevGrades.map((grade) => ({
+            ...grade,
+            matchas: grade.matchas.map((matcha) =>
+              matcha.id === matchaId ? updatedMatcha : matcha
+            ),
+          }))
+        );
+
+
+        if (onSuccess) onSuccess();
+      })
+      .catch((err) => {
+        if (onError) onError(err.message);
+      });
+  }
 
   return (
     <UserContext.Provider value={{ 
-      user, setUser, 
+      user, setUser,
       userBrands, setUserBrands, 
       userGrades, setUserGrades, 
       handleLogin,handleSignup, 
       handleLogout, addNewMatcha,
-      deleteMatcha
+      updateMatcha, deleteMatcha
     
     }}>
       {children}

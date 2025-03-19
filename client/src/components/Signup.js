@@ -9,14 +9,42 @@ function Signup() {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
 
+  // validation function for password
+  const validatePassword = (password) => {
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!/\d/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    return "";
+  };
+
+
   //update form data
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "password") {
+      setError(validatePassword(value));
+    }
   };
 
   //handles signup redirects to login
   const handleSubmit = (e) => {
     e.preventDefault();
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
     setError("");
 
     handleSignup(formData, () => {

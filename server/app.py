@@ -6,12 +6,12 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from config import app, db, api
 from models import User, Matcha, Brand, Grade
 
-# initialize flask login
+# initialize flask login. login manager handles user authentication
 login_manager = LoginManager()
+#attaches to app to manage user sessions
 login_manager.init_app(app)
 
-
-# define user_loader function for flask login
+# define user_loader function for flask login to retrieve the user from the database
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -34,6 +34,7 @@ class Login(Resource):
         if user is None:
             return make_response(jsonify({"error": "User not found"}), 404)
 
+        #authenticate users
         if user.authenticate(data['password']):
             #login user with flask login
             login_user(user) 
@@ -54,6 +55,7 @@ class Login(Resource):
                     "grade_id": matcha.grade_id,
                 }
 
+                #group matchas by brand
                 if matcha.brand_id not in user_brands:
                     user_brands[matcha.brand_id] = {
                         "id": matcha.brand.id,
@@ -63,6 +65,7 @@ class Login(Resource):
                     }
                 user_brands[matcha.brand_id]["matchas"].append(matcha_data)
 
+                #group matchas by grade
                 if matcha.grade_id not in user_grades:
                     user_grades[matcha.grade_id] = {
                         "id": matcha.grade.id,
@@ -71,6 +74,7 @@ class Login(Resource):
                     }
                 user_grades[matcha.grade_id]["matchas"].append(matcha_data)
 
+            #return user details with their matchas
             return make_response(jsonify({
                 "id": user.id,
                 "username": user.username,
@@ -79,8 +83,6 @@ class Login(Resource):
             }), 200)
 
         return make_response(jsonify({"error": "Invalid credentials"}), 401)
-
-
 
 
 class CheckSession(Resource):
@@ -96,6 +98,7 @@ class CheckSession(Resource):
         user_brands = {}
         user_grades = {}
 
+
         for matcha in user_matchas:
             matcha_data = {
                 "origin": matcha.origin,
@@ -107,6 +110,7 @@ class CheckSession(Resource):
                 "grade_id": matcha.grade_id,
             }
 
+            #group matchas by brand
             if matcha.brand_id not in user_brands:
                 user_brands[matcha.brand_id] = {
                     "id": matcha.brand.id,
@@ -115,7 +119,8 @@ class CheckSession(Resource):
                     "matchas": []
                 }
             user_brands[matcha.brand_id]["matchas"].append(matcha_data)
-
+            
+            #group matchas by grade
             if matcha.grade_id not in user_grades:
                 user_grades[matcha.grade_id] = {
                     "id": matcha.grade.id,
@@ -159,7 +164,7 @@ class Users(Resource):
         if existing_user:
             return make_response(jsonify({"error": "Username already exists"}), 400)
 
-        #store username in lowercase
+        #store username in lowercase and create user
         new_user = User(username=username_lower)
         new_user.password_hash = data["password"]
         db.session.add(new_user)
