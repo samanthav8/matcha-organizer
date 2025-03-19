@@ -13,7 +13,6 @@ import "../styles/style.css";
 
 function App() {
   const location = useLocation(); 
-
   // change title dynamically
   useEffect(() => {
     const pageTitles = {

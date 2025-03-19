@@ -16,10 +16,6 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@app.route('/')
-def index():
-    return '<h1>Matcha Organizer API</h1>'
-
 class Login(Resource):
     def post(self):
         data = request.get_json()
