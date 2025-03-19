@@ -153,43 +153,30 @@ export function UserProvider({ children }) {
       .catch(() => alert("Error adding matcha."));
   }
 
-  function updateMatcha(matchaId, updatedData, onSuccess, onError) {
+  function deleteMatcha(matchaId, onSuccess, onError) {
     fetch(`/matchas/${matchaId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedData),
+      method: "DELETE",
       credentials: "include",
     })
-      .then((res) => res.json())
-      .then((updatedMatcha) => {
-        if (updatedMatcha.error) throw new Error(updatedMatcha.error);
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete matcha");
   
-        // ✅ Update userBrands
         setUserBrands((prevBrands) =>
-          prevBrands.map((brand) =>
-            brand.id === updatedMatcha.brand_id
-              ? {
-                  ...brand,
-                  matchas: brand.matchas.map((matcha) =>
-                    matcha.id === updatedMatcha.id ? updatedMatcha : matcha
-                  ),
-                }
-              : brand
-          )
+          prevBrands
+            .map((brand) => ({
+              ...brand,
+              matchas: brand.matchas.filter((matcha) => matcha.id !== matchaId),
+            }))
+            .filter((brand) => brand.matchas.length > 0) // Remove empty brands
         );
   
-        // ✅ Update userGrades
         setUserGrades((prevGrades) =>
-          prevGrades.map((grade) =>
-            grade.id === updatedMatcha.grade_id
-              ? {
-                  ...grade,
-                  matchas: grade.matchas.map((matcha) =>
-                    matcha.id === updatedMatcha.id ? updatedMatcha : matcha
-                  ),
-                }
-              : grade
-          )
+          prevGrades
+            .map((grade) => ({
+              ...grade,
+              matchas: grade.matchas.filter((matcha) => matcha.id !== matchaId),
+            }))
+            .filter((grade) => grade.matchas.length > 0) // Remove empty grades
         );
   
         if (onSuccess) onSuccess();
@@ -201,7 +188,6 @@ export function UserProvider({ children }) {
   
 
 
-
   return (
     <UserContext.Provider value={{ 
       user, setUser, 
@@ -209,6 +195,8 @@ export function UserProvider({ children }) {
       userGrades, setUserGrades, 
       handleLogin,handleSignup, 
       handleLogout, addNewMatcha,
+      deleteMatcha
+    
     }}>
       {children}
     </UserContext.Provider>

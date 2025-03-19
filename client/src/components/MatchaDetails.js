@@ -6,7 +6,7 @@ import { UserContext } from "../context/UserContext";
 
 function MatchaDetails() {
   const { id } = useParams();
-  const { userBrands, userGrades } = useContext(UserContext);
+  const { userBrands, userGrades, deleteMatcha } = useContext(UserContext);
   const navigate = useNavigate();
 
 
@@ -27,6 +27,14 @@ function MatchaDetails() {
   }
   //return error if no matcha is found
   if (!matcha) return <p className="error">Matcha not found</p>;
+
+  const handleDelete = () => {
+    deleteMatcha(matcha.id, () => {
+      alert("Matcha successfully deleted! 🍵");
+      navigate("/home");
+    });
+  };
+
   return (
     <div>
       <NavBar />
@@ -39,7 +47,10 @@ function MatchaDetails() {
           <p className="matcha-details-text"> ˖⊹ ࣪ 🍵 ˖⊹ ࣪ ˖ ˖⊹ ࣪ 🍵 ˖⊹ ࣪ ˖ ˖⊹ ࣪ 🍵 ˖⊹ ࣪ ˖ ˖⊹ ࣪ 🍵 ˖⊹ ࣪ ˖</p>
           <button className="button-small" onClick={() => navigate(`/matchas/${matcha.id}/edit`)}>
           Edit Matcha
-        </button>
+          </button>
+          <button className="button-small delete-button" onClick={handleDelete}>
+            Delete Matcha
+          </button>
         </div>
       </div>
     </div>
